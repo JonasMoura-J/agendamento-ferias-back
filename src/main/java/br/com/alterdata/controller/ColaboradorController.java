@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.alterdata.domain.Colaborador;
@@ -50,4 +52,18 @@ public class ColaboradorController {
 				
 		return ResponseEntity.status(HttpStatus.OK).body(colaboradorResponseDTO);
 	}
+	
+	@PostMapping("/colaborador")
+	public ResponseEntity<Colaborador> postColaborador(@RequestBody Colaborador colaborador) {
+
+		Colaborador valida = colaboradorRepository.buscarPorLogin(colaborador.getLogin());
+		
+		if (valida == null) {
+			colaboradorRepository.save(colaborador);
+				return new ResponseEntity<>(colaborador, HttpStatus.CREATED);
+			
+		}
+		return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+	}
+
 }
