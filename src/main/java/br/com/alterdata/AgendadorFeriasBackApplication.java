@@ -17,5 +17,4 @@ public class AgendadorFeriasBackApplication {
 		SpringApplication.run(AgendadorFeriasBackApplication.class, args);
 		
 	}
-
 }
