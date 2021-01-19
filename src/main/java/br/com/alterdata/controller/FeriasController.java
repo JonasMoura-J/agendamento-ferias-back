@@ -1,9 +1,8 @@
 package br.com.alterdata.controller;
 
+import java.net.URI;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,8 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import br.com.alterdata.domain.Colaborador;
 import br.com.alterdata.domain.Ferias;
 import br.com.alterdata.dto.FeriasDTO;
 import br.com.alterdata.dto.FeriasRequestDTO;
@@ -23,6 +22,7 @@ import br.com.alterdata.dto.FeriasResponseDTO;
 import br.com.alterdata.enums.Funcao;
 import br.com.alterdata.repositories.ColaboradorRepository;
 import br.com.alterdata.repositories.FeriasRepository;
+import br.com.alterdata.services.FeriasService;
 
 @RestController
 public class FeriasController {
@@ -31,156 +31,71 @@ public class FeriasController {
 	
 	@Autowired
 	FeriasRepository feriasRepository;
-	
 	@Autowired
 	ColaboradorRepository colaboradorRepository;
 	
+	@Autowired
+	FeriasService feriasService;
+	
 	@GetMapping("/ferias")
 	public ResponseEntity <List<FeriasResponseDTO>> findAll() {
-		List<Ferias> ferias = feriasRepository.buscarTodas();
-		List<FeriasResponseDTO> feriasResponseDTO = ferias
-				.stream()
-				.map(x -> new FeriasResponseDTO(x))
-				.collect(Collectors.toList());
-		
+		List<FeriasResponseDTO> feriasResponseDTO = feriasService.buscarTodasFerias();
 		return ResponseEntity.status(HttpStatus.OK).body(feriasResponseDTO);
 	}
 	
 	@GetMapping("/ferias/{duracao}")
-	public ResponseEntity <List<FeriasResponseDTO>> pegarFeriasPorDuracao(@PathVariable int duracao) {
-		List<Ferias> ferias = feriasRepository.buscarPorDuracao(duracao);
-		
-		List<FeriasResponseDTO> feriasResponseDTO = ferias
-				.stream()
-				.map(x -> new FeriasResponseDTO(x))
-				.collect(Collectors.toList());
-		
+	public ResponseEntity <List<FeriasResponseDTO>> pegarFeriasPorDuracao(@PathVariable int duracao) {	
+		List<FeriasResponseDTO> feriasResponseDTO = feriasService.feriasPorDuracao(duracao);
 		return ResponseEntity.status(HttpStatus.OK).body(feriasResponseDTO);
 	}
 	
 	@GetMapping("ferias/{mes}/{ano}")
 	public ResponseEntity <List<FeriasDTO>> listarPorPeriodo(@PathVariable int mes,  @PathVariable int ano) {
-
-		List<Ferias> ferias = feriasRepository.buscarTodas();
-		
-		List<Ferias> feriasPorPeriodo = new ArrayList<>();
-		
-		for (Ferias f : ferias) {
-			boolean estahNoBanco = f.getDataInicio().getMonthValue()== mes && f.getDataInicio().getYear()== ano;
-			
-			if(estahNoBanco) {
-				feriasPorPeriodo.add(f);
-			}
-		}
-		List<FeriasDTO> feriasDTO = feriasPorPeriodo
-				.stream()
-				.map(x -> new FeriasDTO(x))
-				.collect(Collectors.toList());
-		
+		List<FeriasDTO> feriasDTO = feriasService.buscarPorMesEAno(mes, ano);
 		return ResponseEntity.status(HttpStatus.OK).body(feriasDTO);
 	}
 	
 	@GetMapping("ferias/ano/{ano}")
 	public ResponseEntity <List<FeriasDTO>> listarPorAno(@PathVariable int ano) {
-
-		List<Ferias> ferias = feriasRepository.buscarTodas();
-		
-		List<Ferias> feriasPorPeriodo = new ArrayList<>();
-		
-		for (Ferias f : ferias) {
-			if(f.getDataInicio().getYear() == ano) {
-				feriasPorPeriodo.add(f);
-			}
-		}
-		List<FeriasDTO> feriasDTO = feriasPorPeriodo
-				.stream()
-				.map(x -> new FeriasDTO(x))
-				.collect(Collectors.toList());
-		
+		List<FeriasDTO> feriasDTO = feriasService.buscarPorAno(ano);	
 		return ResponseEntity.status(HttpStatus.OK).body(feriasDTO);
 	}
 	
 	@GetMapping("ferias/{mesinicio}/{mesFim}/{ano}")
-	public ResponseEntity <List<FeriasDTO>> listarPorPeriodoOsAtivos(@PathVariable int mesinicio, @PathVariable int mesFim, @PathVariable int ano) {
-
-		List<Ferias> ferias = feriasRepository.buscarTodas();
+	public ResponseEntity <List<FeriasDTO>> listarPorPeriodoOsAtivos(@PathVariable int mesinicio,
+			@PathVariable int mesFim, @PathVariable int ano) {
 		
-		List<Ferias> feriasPorPeriodo = new ArrayList<>();
-		
- 		for (Ferias f : ferias) {
-			if((f.getDataInicio().getMonthValue() == mesinicio || f.getDataFim().getMonthValue()== mesFim) && f.getDataInicio().getYear() == ano) {
-				feriasPorPeriodo.add(f);
-			}
-		}
-		List<FeriasDTO> feriasDTO = feriasPorPeriodo
-				.stream()
-				.map(x -> new FeriasDTO(x))
-				.collect(Collectors.toList());
-		
+		List<FeriasDTO> feriasDTO = feriasService.buscarPorPeriodoOsAtivos(mesinicio, mesFim, ano);
 		return ResponseEntity.status(HttpStatus.OK).body(feriasDTO);
 	}
 	
 	@GetMapping("ferias/registro/{funcao}/{mes}/{ano}")
 	public ResponseEntity <List<FeriasDTO>> listarPorFucaoEPeriodo(@PathVariable Funcao funcao,
 			@PathVariable int mes, @PathVariable int ano) {
-
-		List<Ferias> ferias = feriasRepository.findAll();
 		
-		List<Ferias> feriasPorPeriodo = new ArrayList<>();
-		
-		for (Ferias f : ferias) {
-			if(f.getDataInicio().getMonthValue()== mes && f.getDataInicio().getYear()== ano && f.getColaborador().getFuncao() == funcao) {
-				feriasPorPeriodo.add(f);
-			}
-		}
-		List<FeriasDTO> feriasDTO = feriasPorPeriodo
-				.stream()
-				.map(x -> new FeriasDTO(x))
-				.collect(Collectors.toList());
-		
+		List<FeriasDTO> feriasDTO = feriasService.buscarPorFucaoEPeriodo(funcao, mes, ano);
 		return ResponseEntity.status(HttpStatus.OK).body(feriasDTO);
 	}
 
 	@PostMapping("/ferias")
-	public ResponseEntity<Ferias> postFerias(@RequestBody FeriasRequestDTO dto) {
+	public ResponseEntity<?> postFerias(@RequestBody FeriasRequestDTO dto) throws Exception {
 
-		Ferias ferias = dto.toFerias(colaboradorRepository);
-		Ferias valida = feriasRepository.buscarPorId(ferias.getId());
-		
-		if (valida == null) {
-				Colaborador colaborador = colaboradorRepository.buscarPorLogin(dto.getLogin());
-				colaborador.getFerias().add(ferias);
-				
-				feriasRepository.save(ferias);
-				
-				ferias.enviarEmail(ferias.getColaborador().getNome(),
-						ferias.getColaborador().getEmail(),
-						ferias.getDataInicio(), ferias.getDataFim(), ferias.getDuracao());
-				
-				return new ResponseEntity<>(ferias, HttpStatus.CREATED);
-			
+		Ferias ferias = feriasService.adicionarFerias(dto);
+		if (ferias == null) {		
+			return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Não foi possível cadastrar férias");
 		}
-		return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		URI uri = ServletUriComponentsBuilder
+				.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(ferias.getId())
+				.toUri();
+		return ResponseEntity.created(uri).build();
 	}
 	
 	@PutMapping("ferias/{id}")
-	public ResponseEntity<Ferias> AtualizarFerias(@PathVariable long id,@RequestBody FeriasRequestDTO dto) {
-		
-		Ferias feriasExistente = feriasRepository.buscarPorId(id);
-		Ferias feriasAtualizada = dto.toFerias(colaboradorRepository);
-		
-		if(feriasExistente == null) {
-			return ResponseEntity.notFound().build();
-		}
-		
-		feriasExistente.setColaborador(feriasAtualizada.getColaborador());
-		feriasExistente.setDataFim(feriasAtualizada.getDataFim());
-		feriasExistente.setDataInicio(feriasAtualizada.getDataInicio());
-		feriasExistente.setDuracao(feriasAtualizada.getDuracao());
-		feriasExistente.setId(feriasAtualizada.getId());
-		
-		feriasRepository.save(feriasExistente);
-		
-		return ResponseEntity.ok().body(feriasExistente);
+	public ResponseEntity<Ferias> AtualizarFerias(@PathVariable long id,
+			@RequestBody FeriasRequestDTO dto) throws Exception {
+		Ferias ferias = feriasService.atualizar(dto, id);
+		return ResponseEntity.ok().body(ferias);
 	}
 }

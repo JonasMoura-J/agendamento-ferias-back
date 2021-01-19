@@ -2,9 +2,6 @@ package br.com.alterdata.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.Servlet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,14 +16,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import br.com.alterdata.domain.Colaborador;
 import br.com.alterdata.dto.ColaboradorDTO;
 import br.com.alterdata.dto.ColaboradorResponseDTO;
-import br.com.alterdata.repositories.ColaboradorRepository;
 import br.com.alterdata.services.ColaboradorService;
 
 @RestController
 public class ColaboradorController {
-	
-	@Autowired
-	ColaboradorRepository colaboradorRepository;
 	
 	@Autowired
 	ColaboradorService colaboradorService;
