@@ -1,7 +1,10 @@
 package br.com.alterdata.controller;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.servlet.Servlet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,11 +14,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.alterdata.domain.Colaborador;
 import br.com.alterdata.dto.ColaboradorDTO;
 import br.com.alterdata.dto.ColaboradorResponseDTO;
 import br.com.alterdata.repositories.ColaboradorRepository;
+import br.com.alterdata.services.ColaboradorService;
 
 @RestController
 public class ColaboradorController {
@@ -23,47 +28,39 @@ public class ColaboradorController {
 	@Autowired
 	ColaboradorRepository colaboradorRepository;
 	
+	@Autowired
+	ColaboradorService colaboradorService;
+	
 	@GetMapping("/colaboradores")
 	public ResponseEntity <List<ColaboradorDTO>> buscarTodos() {
-		List<Colaborador> colaboradores = colaboradorRepository.buscarTodos();
-		List<ColaboradorDTO> colaboradoresDTO = colaboradores
-				.stream()
-				.map(x -> new ColaboradorDTO(x))
-				.collect(Collectors.toList());
-		
-		return ResponseEntity.status(HttpStatus.OK).body(colaboradoresDTO);
+		List<ColaboradorDTO> colaborador = colaboradorService.buscarTodosColaboradores();
+		return ResponseEntity.status(HttpStatus.OK).body(colaborador);
 	}
 	
 	@GetMapping("/colaboradoresSimples")
 	public ResponseEntity <List<ColaboradorResponseDTO>> buscarTodosObjSimplificado() {
-		List<Colaborador> colaboradores = colaboradorRepository.findAll();
-		List<ColaboradorResponseDTO> colaboradorResponseDTO = colaboradores
-				.stream()
-				.map(x -> new ColaboradorResponseDTO(x))
-				.collect(Collectors.toList());
-		
+		List<ColaboradorResponseDTO> colaboradorResponseDTO	= colaboradorService.buscarTodosObjSimplificado();
 		return ResponseEntity.status(HttpStatus.OK).body(colaboradorResponseDTO);
 	}
 	
 	@GetMapping("/colaborador/{login}")
 	public ResponseEntity<ColaboradorResponseDTO> buscarColaboradorPorID(@PathVariable String login) {
-		Colaborador colaborador = colaboradorRepository.buscarPorLogin(login);
-		ColaboradorResponseDTO colaboradorResponseDTO = new ColaboradorResponseDTO(colaborador);
-				
-		return ResponseEntity.status(HttpStatus.OK).body(colaboradorResponseDTO);
+		ColaboradorResponseDTO colaborador = colaboradorService.buscarColaboradorPorLogin(login);
+		return ResponseEntity.status(HttpStatus.OK).body(colaborador);
 	}
 	
 	@PostMapping("/colaborador")
-	public ResponseEntity<Colaborador> postColaborador(@RequestBody Colaborador colaborador) {
-
-		Colaborador valida = colaboradorRepository.buscarPorLogin(colaborador.getLogin());
-		
-		if (valida == null) {
-			colaboradorRepository.save(colaborador);
-				return new ResponseEntity<>(colaborador, HttpStatus.CREATED);
-			
+	public ResponseEntity<?> postColaborador(@RequestBody Colaborador colaborador) {
+		colaborador = colaboradorService.inserirColaborador(colaborador);
+		if(colaborador == null) {
+			return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Login já cadastrado");
 		}
-		return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+		URI uri = ServletUriComponentsBuilder
+				.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(colaborador.getId())
+				.toUri();
+		return ResponseEntity.created(uri).build();
 	}
 
 }
