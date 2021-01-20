@@ -11,6 +11,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import br.com.alterdata.domain.Colaborador;
 import br.com.alterdata.domain.Ferias;
 import br.com.alterdata.repositories.ColaboradorRepository;
+import javassist.NotFoundException;
 
 public class FeriasRequestDTO {
 	
@@ -24,12 +25,12 @@ public class FeriasRequestDTO {
 	
 	private String login;
 	
-	public Ferias toFerias(ColaboradorRepository repository) {
+	public Ferias toFerias(ColaboradorRepository repository) throws NotFoundException {
 
 		Colaborador contemColaborador = repository.buscarPorLogin(login);
 		
 		if (contemColaborador == null) {
-			throw new HttpServerErrorException(HttpStatus.BAD_REQUEST, "O login não existe");
+			throw new NotFoundException("O login não existe");
 		}
 		
 		int periodo = Period.between(LocalDate.now(), this.dataInicio).getDays();
