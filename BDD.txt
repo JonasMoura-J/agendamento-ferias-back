@@ -1,0 +1,84 @@
+Cadastro de Férias:
+
+Recurso: Cadastrar férias de usuário.
+Como analista de recursos humanos posso cadastrar as férias dos colaboradores.
+	-O Analista deve buscar por um login válido.
+	-O Colaborador deve possuir mais de um ano na Empresa.
+	-O Colaborador deve ter somente 30 dias de férias por ano.
+
+Cenário: Cadastro de férias de um colaborador que possui mais de um ano na empresa e não desfrutou das férias neste ano.
+Dado: Login válido.
+E: O resultado em dias da subtração entre a data final das férias e a data inicial tem que ser igual à duração.
+Quando: O Analista envia a requisição.
+Então: As férias serão cadastradas.
+
+Cenário: Cadastro de férias de um colaborador que não possui mais de um ano na empresa.
+Dado: Login válido.
+E: O resultado em dias da subtração entre a data final das férias e a data inicial tem que ser igual à duração.
+Quando: O Analista envia a requisição.
+Então: É apresentada uma mensagem de rejeição ao Analista informando que o colaborador não possui 1 ano de contrato.
+
+Cenário: Cadastro de férias de um colaborador que não existe.
+Dado: Login inválido.
+Quando: O Analista envia a requisição.
+Então: É apresentada uma mensagem de rejeição ao Analista informando que o login é inválido.
+
+Cenário: Cadastro de férias de um colaborador que já desfrutou dos 30 dias de férias no ano.
+Dado: Login válido.
+E: O resultado em dias da subtração entre a data final das férias e a data inicial tem que ser igual à duração.
+Quando: O Analista envia a requisição.
+Então: É apresentada uma mensagem de rejeição ao Analista informando que o Colaborador já usufruiu das férias neste ano.
+
+Cenário: Cadastro de férias em datas passadas.
+Dado: Login válido.
+E: O resultado em dias da subtração entre a data final das férias e a data inicial igual à duração.
+Quando: O Analista envia a requisição.
+Então: É apresentada uma mensagem de rejeição ao Analista informando que não é possível cadastrar em datas passadas.
+
+Cenário: Cadastro de férias em que a duração não condiz com a diferença entre a data de fim e data de início.
+Dado: Login válido.
+E: O resultado em dias da subtração entre a data final das férias e a data inicial diferente da duração.
+Quando: O Analista envia a requisição.
+Então: É apresentada uma mensagem de rejeição ao Analista informando que a duração entre a data de início e a data fim não condizem com a duração.
+
+Cenário: Cadastro de férias em datas passadas.
+Dado: Login válido.
+E: O resultado em dias da subtração entre a data final das férias e a data inicial igual a duração.
+Quando: O Analista envia a requisição.
+Então: É apresentada uma mensagem de rejeição ao Analista informando que não é possível cadastrar em datas passadas.
+
+
+
+Visualizar registro de férias:
+
+Recurso: Visualizar registros.
+Como analista de recursos humanos posso visualizar os registros de férias  por período e por funções.
+
+Cenário: Visualizar quando o filtro retorna registros.
+Dado: filtros.
+Então: Os Registros serão retornados para a visualização.
+
+Cenário: Visualizar quando não encontra registros pelo filtro.
+Dado: filtros.
+Então: É apresentada uma mensagem dizendo que não foi encontrado nenhum registro.
+
+
+Gerar relatório
+
+Recurso: gerar relatório em PDF dos Registros filtrando por mês e ano.
+Como analista de recursos humanos posso gerar um relatório de registros.
+
+Cenário: Gerar relatório.
+Dado: filtros.
+Então: O arquivo PDF será gerado e baixado.
+
+
+Email:
+
+Recurso: E-mail automático.
+Como colaborador, posso visualizar um e-mail informando a data de início, a data final e a duração das férias.
+
+Cenário: Cadastro de férias de um colaborador.
+Dado: login.
+E: Datas.
+Então: O e-mail é enviado ao colaborador com as informações.

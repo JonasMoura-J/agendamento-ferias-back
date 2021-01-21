@@ -56,8 +56,6 @@ public class Colaborador implements Serializable{
 		
 	}
 
-	
-
 	public Colaborador(long id, @NotNull String login, @NotNull String nome, @NotNull String email,
 			@NotNull LocalDate dataAdmissao, @NotNull String departamento,
 			@NotNull LocalDate aniversarioDataContratacao, @NotNull Funcao funcao, List<Ferias> ferias) {
@@ -72,8 +70,6 @@ public class Colaborador implements Serializable{
 		this.funcao = funcao;
 		this.ferias = ferias;
 	}
-
-
 
 	public long getId() {
 		return id;
